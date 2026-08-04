@@ -1,0 +1,307 @@
+// ============================================================
+// Temple Management System - Prisma Schema
+// Designed to be Supabase-migration friendly:
+//  - Pure PostgreSQL types (no provider-specific extensions)
+//  - UUID primary keys (matches Supabase `auth.users.id` style)
+//  - Timestamps with timezone
+//  - No reliance on Prisma-only features that Supabase can't mirror
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------- ENUMS --------------------
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum BookingStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  RAZORPAY
+  CASH
+  COUNTER_UPI
+  BANK_TRANSFER
+  CHEQUE
+}
+
+enum PaymentStatus {
+  CREATED
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum DonationType {
+  GENERAL
+  FESTIVAL
+  TEMPLE_DEVELOPMENT
+  SPECIAL_EVENT
+}
+
+enum ReceiptType {
+  POOJA_BOOKING
+  DONATION
+  ANNUAL_SCHEME
+}
+
+enum NotificationType {
+  EMAIL
+  SMS
+  SYSTEM
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+// -------------------- USERS / AUTH --------------------
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  googleId      String?  @unique
+  phone         String?
+  fullName      String
+  passwordHash  String?
+  role          Role     @default(STAFF)
+  isActive      Boolean  @default(true)
+  refreshTokenHash String?
+  resetPasswordToken String?
+  resetPasswordExpires DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  bookingsCreated   Booking[]        @relation("BookingCreatedBy")
+  donationsRecorded Donation[]       @relation("DonationRecordedBy")
+  auditLogs         AuditLog[]
+
+  @@map("users")
+}
+
+// -------------------- POOJAS --------------------
+
+model Pooja {
+  id          String   @id @default(uuid())
+  name        String   // Malayalam name
+  nameEn      String   // English transliteration / name
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  durationMinutes Int  @default(30)
+  imageUrl    String?
+  isAvailable Boolean  @default(true)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings    Booking[]
+
+  @@map("poojas")
+}
+
+// -------------------- BOOKINGS --------------------
+
+model Booking {
+  id              String        @id @default(uuid())
+  bookingNumber   String        @unique // e.g. TMP-2026-000123
+
+  poojaId         String
+  pooja           Pooja         @relation(fields: [poojaId], references: [id])
+
+  poojaDate       DateTime
+
+  devoteeName     String
+  nakshatra       String?
+  email           String
+  phone           String
+  address         String?
+
+  status          BookingStatus @default(PENDING_PAYMENT)
+
+  amount          Decimal       @db.Decimal(10, 2)
+
+  createdByUserId String?       // set when created by admin (offline counter booking)
+  createdByUser   User?         @relation("BookingCreatedBy", fields: [createdByUserId], references: [id])
+  isOfflineBooking Boolean      @default(false)
+
+  payment         Payment?
+  receipt         Receipt?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([poojaDate])
+  @@index([status])
+  @@map("bookings")
+}
+
+// -------------------- ANNUAL SCHEMES --------------------
+
+model AnnualScheme {
+  id              String        @id @default(uuid())
+  schemeNumber    String        @unique
+
+  schemeName      String        // e.g. "Annual Archana"
+  poojaId         String?
+  devoteeName     String
+  nakshatra       String?
+  email           String
+  phone           String
+  address         String?
+
+  amount          Decimal       @db.Decimal(10, 2)
+
+  startDate       DateTime
+  endDate         DateTime
+  renewalDate     DateTime
+  reminderSent    Boolean       @default(false)
+
+  status          BookingStatus @default(PENDING_PAYMENT)
+
+  payment         Payment?
+  receipt         Receipt?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("annual_schemes")
+}
+
+// -------------------- DONATIONS --------------------
+
+model Donation {
+  id              String        @id @default(uuid())
+  donationNumber  String        @unique
+
+  donationType    DonationType
+  donorName       String
+  email           String?
+  phone           String?
+  address         String?
+  panNumber       String?       // for 80G receipts, optional
+  amount          Decimal       @db.Decimal(10, 2)
+  message         String?
+
+  recordedByUserId String?      // set for offline/manual entries
+  recordedByUser   User?        @relation("DonationRecordedBy", fields: [recordedByUserId], references: [id])
+
+  payment         Payment?
+  receipt         Receipt?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("donations")
+}
+
+// -------------------- PAYMENTS --------------------
+// One payment row per transaction, linked to exactly one of:
+// booking / annualScheme / donation (enforced at application level).
+
+model Payment {
+  id                String        @id @default(uuid())
+
+  bookingId         String?       @unique
+  booking           Booking?      @relation(fields: [bookingId], references: [id])
+
+  annualSchemeId    String?       @unique
+  annualScheme      AnnualScheme? @relation(fields: [annualSchemeId], references: [id])
+
+  donationId        String?       @unique
+  donation          Donation?     @relation(fields: [donationId], references: [id])
+
+  method            PaymentMethod
+  status            PaymentStatus @default(CREATED)
+
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String        @default("INR")
+
+  razorpayOrderId   String?       @unique
+  razorpayPaymentId String?       @unique
+  razorpaySignature String?
+
+  offlineReference  String?       // cheque no. / bank txn ref for offline payments
+
+  rawWebhookPayload Json?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+// -------------------- RECEIPTS --------------------
+
+model Receipt {
+  id              String      @id @default(uuid())
+  receiptNumber   String      @unique // e.g. RCPT-2026-000123
+
+  receiptType     ReceiptType
+
+  bookingId       String?     @unique
+  booking         Booking?    @relation(fields: [bookingId], references: [id])
+
+  annualSchemeId  String?     @unique
+  annualScheme    AnnualScheme? @relation(fields: [annualSchemeId], references: [id])
+
+  donationId      String?     @unique
+  donation        Donation?   @relation(fields: [donationId], references: [id])
+
+  pdfPath         String?     // path/key in storage abstraction
+  emailedAt       DateTime?
+  reprintCount    Int         @default(0)
+
+  createdAt       DateTime    @default(now())
+
+  @@map("receipts")
+}
+
+// -------------------- NOTIFICATIONS --------------------
+
+model Notification {
+  id          String              @id @default(uuid())
+  type        NotificationType
+  recipient   String
+  subject     String?
+  body        String
+  status      NotificationStatus  @default(PENDING)
+  error       String?
+  createdAt   DateTime            @default(now())
+  sentAt      DateTime?
+
+  @@map("notifications")
+}
+
+// -------------------- AUDIT LOGS --------------------
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  action      String   // e.g. "BOOKING_STATUS_UPDATED"
+  entityType  String   // e.g. "Booking"
+  entityId    String?
+  metadata    Json?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  @@map("audit_logs")
+}
