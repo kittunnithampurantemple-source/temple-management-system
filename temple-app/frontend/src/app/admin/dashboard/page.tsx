@@ -92,12 +92,12 @@ export default function AdminDashboardPage() {
             ⚡
           </div>
           <div>
-            <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Welcome back! Here's what's happening at the temple.</p>
+            <h1 className="font-display text-3xl font-bold text-white drop-shadow-lg">Dashboard Overview</h1>
+            <p className="text-sm text-purple-200/70 mt-0.5">Welcome back! Here's what's happening at the temple.</p>
           </div>
         </div>
         {/* Decorative line */}
-        <div className="mt-4 h-px w-full bg-gradient-to-r from-amber-400 via-rose-400 to-violet-400 opacity-40 rounded-full" />
+        <div className="mt-4 h-px w-full bg-gradient-to-r from-purple-500 via-pink-400 to-violet-400 opacity-60 rounded-full" />
       </div>
 
       {/* Loading skeleton */}
@@ -121,7 +121,7 @@ export default function AdminDashboardPage() {
               >
                 {/* Card background noise/texture */}
                 <div className="absolute inset-0 opacity-[0.04]"
-                  style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                  style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.3) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
                 {/* Top glow orb */}
                 <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-white/10 blur-2xl group-hover:bg-white/20 transition-all duration-500" />
@@ -154,7 +154,7 @@ export default function AdminDashboardPage() {
 
       {/* Quick Actions Section */}
       <div className="relative z-10 mt-10">
-        <h2 className="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-bold text-white/90 mb-4 flex items-center gap-2">
           <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-xs">🚀</span>
           Quick Actions
         </h2>
