@@ -29,7 +29,10 @@ async function bootstrap() {
   );
   app.use(express.json());
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      /\.vercel\.app$/, // Allow any Vercel preview URLs automatically!
+    ],
     credentials: true,
   });
 
