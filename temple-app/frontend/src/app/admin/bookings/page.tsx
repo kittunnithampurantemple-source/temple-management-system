@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Pooja, Booking } from '@/lib/types';
+import { AdminPageShell, AdminFormCard, AdminTable, AdminTr, AdminTd, AdminBtn, AdminPrimaryBtn, AdminInput, AdminSelect, StatusBadge } from '@/components/admin/AdminUI';
 
 const statuses = ['PENDING_PAYMENT', 'CONFIRMED', 'SCHEDULED', 'COMPLETED', 'CANCELLED'];
 const paymentMethods = ['CASH', 'COUNTER_UPI', 'BANK_TRANSFER', 'CHEQUE'];
@@ -28,72 +29,78 @@ export default function AdminBookingsPage() {
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
 
   const updateStatus = async (id: string, status: string) => {
-    await api.patch(`/bookings/${id}/status`, { status });
-    refresh();
+    await api.patch(`/bookings/${id}/status`, { status }); refresh();
   };
 
   const submitOffline = async () => {
     await api.post('/bookings/offline', offlineForm);
-    setShowOfflineForm(false);
-    refresh();
+    setShowOfflineForm(false); refresh();
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="font-display text-3xl text-sanctum">Booking Management</h1>
-        <button onClick={() => setShowOfflineForm(!showOfflineForm)} className="bg-sanctum text-cream px-4 py-2 rounded-sm text-sm hover:bg-sanctum-dark">
-          {showOfflineForm ? 'Cancel' : '+ Offline Counter Booking'}
-        </button>
-      </div>
-
+    <AdminPageShell
+      title="Booking Management" icon="📅" subtitle="Manage devotee pooja bookings"
+      action={
+        <AdminPrimaryBtn onClick={() => setShowOfflineForm(!showOfflineForm)}>
+          {showOfflineForm ? '✕ Cancel' : '+ Offline Booking'}
+        </AdminPrimaryBtn>
+      }
+    >
       {showOfflineForm && (
-        <div className="bg-white border border-brass/20 rounded-sm p-5 mb-6 grid md:grid-cols-2 gap-3">
-          <select value={offlineForm.poojaId} onChange={(e) => setOfflineForm({ ...offlineForm, poojaId: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2">
+        <AdminFormCard>
+          <AdminSelect value={offlineForm.poojaId} onChange={(e) => setOfflineForm({ ...offlineForm, poojaId: e.target.value })}>
             <option value="">Select Pooja</option>
-            {poojas?.map((p) => <option key={p.id} value={p.id}>{p.nameEn} - ₹{Number(p.price).toFixed(2)}</option>)}
-          </select>
-          <input type="date" value={offlineForm.poojaDate} onChange={(e) => setOfflineForm({ ...offlineForm, poojaDate: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Devotee Name" value={offlineForm.devoteeName} onChange={(e) => setOfflineForm({ ...offlineForm, devoteeName: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Nakshatra" value={offlineForm.nakshatra} onChange={(e) => setOfflineForm({ ...offlineForm, nakshatra: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Email" value={offlineForm.email} onChange={(e) => setOfflineForm({ ...offlineForm, email: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Phone" value={offlineForm.phone} onChange={(e) => setOfflineForm({ ...offlineForm, phone: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Address" value={offlineForm.address} onChange={(e) => setOfflineForm({ ...offlineForm, address: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2 md:col-span-2" />
-          <select value={offlineForm.paymentMethod} onChange={(e) => setOfflineForm({ ...offlineForm, paymentMethod: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2">
+            {poojas?.map((p) => <option key={p.id} value={p.id}>{p.nameEn} — ₹{Number(p.price).toFixed(2)}</option>)}
+          </AdminSelect>
+          <AdminInput type="date" value={offlineForm.poojaDate} onChange={(e) => setOfflineForm({ ...offlineForm, poojaDate: e.target.value })} />
+          <AdminInput placeholder="Devotee Name" value={offlineForm.devoteeName} onChange={(e) => setOfflineForm({ ...offlineForm, devoteeName: e.target.value })} />
+          <AdminInput placeholder="Nakshatra" value={offlineForm.nakshatra} onChange={(e) => setOfflineForm({ ...offlineForm, nakshatra: e.target.value })} />
+          <AdminInput placeholder="Email" value={offlineForm.email} onChange={(e) => setOfflineForm({ ...offlineForm, email: e.target.value })} />
+          <AdminInput placeholder="Phone" value={offlineForm.phone} onChange={(e) => setOfflineForm({ ...offlineForm, phone: e.target.value })} />
+          <AdminInput placeholder="Address" value={offlineForm.address} onChange={(e) => setOfflineForm({ ...offlineForm, address: e.target.value })} className="md:col-span-2" />
+          <AdminSelect value={offlineForm.paymentMethod} onChange={(e) => setOfflineForm({ ...offlineForm, paymentMethod: e.target.value })}>
             {paymentMethods.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
-          <input placeholder="Reference (cheque no. / txn ref)" value={offlineForm.offlineReference} onChange={(e) => setOfflineForm({ ...offlineForm, offlineReference: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <button onClick={submitOffline} className="bg-brass text-ink px-4 py-2 rounded-sm md:col-span-2 hover:bg-brass-light">Create Booking & Receipt</button>
-        </div>
+          </AdminSelect>
+          <AdminInput placeholder="Reference (cheque no. / txn ref)" value={offlineForm.offlineReference} onChange={(e) => setOfflineForm({ ...offlineForm, offlineReference: e.target.value })} />
+          <div className="md:col-span-2">
+            <button onClick={submitOffline}
+              className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all duration-300 hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)' }}>
+              ✓ Create Booking & Print Receipt
+            </button>
+          </div>
+        </AdminFormCard>
       )}
 
-      {isLoading && <p className="text-ink/50">Loading...</p>}
-      <div className="bg-white rounded-sm border border-brass/20 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-cream-dark text-left">
-            <tr>
-              <th className="p-3">Booking #</th><th className="p-3">Pooja</th><th className="p-3">Devotee</th>
-              <th className="p-3">Date</th><th className="p-3">Amount</th><th className="p-3">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings?.map((b) => (
-              <tr key={b.id} className="border-t border-brass/10">
-                <td className="p-3">{b.bookingNumber}</td>
-                <td className="p-3">{b.pooja?.nameEn}</td>
-                <td className="p-3">{b.devoteeName}</td>
-                <td className="p-3">{new Date(b.poojaDate).toLocaleDateString('en-IN')}</td>
-                <td className="p-3">₹{Number(b.amount).toFixed(2)}</td>
-                <td className="p-3">
-                  <select value={b.status} onChange={(e) => updateStatus(b.id, e.target.value)} className="border border-brass/30 rounded-sm px-2 py-1 text-xs">
-                    {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      {isLoading && <p className="text-purple-200/40 text-sm animate-pulse">Loading bookings...</p>}
+
+      <AdminTable
+        headers={['Booking #', 'Pooja', 'Devotee', 'Date', 'Amount', 'Status', 'Action']}
+        isEmpty={!isLoading && (!bookings || bookings.length === 0)}
+        emptyMessage="No bookings yet."
+      >
+        {bookings?.map((b, i) => (
+          <AdminTr key={b.id} index={i}>
+            <AdminTd><span className="font-mono text-xs text-purple-300">{b.bookingNumber}</span></AdminTd>
+            <AdminTd><span className="font-semibold text-white">{b.pooja?.nameEn}</span></AdminTd>
+            <AdminTd><span className="text-white/80">{b.devoteeName}</span></AdminTd>
+            <AdminTd><span className="text-purple-200/60 text-xs">{new Date(b.poojaDate).toLocaleDateString('en-IN')}</span></AdminTd>
+            <AdminTd><span className="font-bold text-amber-300">₹{Number(b.amount).toFixed(2)}</span></AdminTd>
+            <AdminTd>
+              <select
+                value={b.status}
+                onChange={(e) => updateStatus(b.id, e.target.value)}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 focus:outline-none focus:border-violet-400/60 cursor-pointer"
+              >
+                {statuses.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
+              </select>
+            </AdminTd>
+            <AdminTd>
+              <StatusBadge status={b.status} />
+            </AdminTd>
+          </AdminTr>
+        ))}
+      </AdminTable>
+    </AdminPageShell>
   );
 }

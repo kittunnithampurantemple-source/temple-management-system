@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Pooja } from '@/lib/types';
+import { AdminPageShell, AdminFormCard, AdminTable, AdminTr, AdminTd, AdminBtn, AdminPrimaryBtn, AdminInput, AdminTextarea, StatusBadge } from '@/components/admin/AdminUI';
 
 const emptyForm = { name: '', nameEn: '', description: '', price: 0, durationMinutes: 30 };
 
@@ -26,80 +27,77 @@ export default function AdminPoojasPage() {
   };
 
   const save = async () => {
-    if (editingId) {
-      await api.patch(`/poojas/${editingId}`, form);
-    } else {
-      await api.post('/poojas', form);
-    }
-    setForm(emptyForm);
-    setEditingId(null);
-    setShowForm(false);
-    refresh();
+    if (editingId) await api.patch(`/poojas/${editingId}`, form);
+    else await api.post('/poojas', form);
+    setForm(emptyForm); setEditingId(null); setShowForm(false); refresh();
   };
 
   const toggleAvailable = async (p: Pooja) => {
-    await api.patch(`/poojas/${p.id}`, { isAvailable: !p.isAvailable });
-    refresh();
+    await api.patch(`/poojas/${p.id}`, { isAvailable: !p.isAvailable }); refresh();
   };
 
   const deactivate = async (p: Pooja) => {
-    await api.delete(`/poojas/${p.id}`);
-    refresh();
+    await api.delete(`/poojas/${p.id}`); refresh();
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="font-display text-3xl text-sanctum">Pooja Management</h1>
-        <button
-          onClick={() => { setShowForm(!showForm); setEditingId(null); setForm(emptyForm); }}
-          className="bg-sanctum text-cream px-4 py-2 rounded-sm text-sm hover:bg-sanctum-dark"
-        >
-          {showForm ? 'Cancel' : '+ Add Pooja'}
-        </button>
-      </div>
-
+    <AdminPageShell
+      title="Pooja Management" icon="🪔" subtitle="Manage temple pooja offerings"
+      action={
+        <AdminPrimaryBtn onClick={() => { setShowForm(!showForm); setEditingId(null); setForm(emptyForm); }}>
+          {showForm ? '✕ Cancel' : '+ Add Pooja'}
+        </AdminPrimaryBtn>
+      }
+    >
       {showForm && (
-        <div className="bg-white border border-brass/20 rounded-sm p-5 mb-6 grid md:grid-cols-2 gap-4">
-          <input placeholder="Name (Malayalam)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Name (English)" value={form.nameEn} onChange={(e) => setForm({ ...form, nameEn: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Price" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Duration (minutes)" type="number" value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2 md:col-span-2" />
-          <button onClick={save} className="bg-brass text-ink px-4 py-2 rounded-sm md:col-span-2 hover:bg-brass-light">
-            {editingId ? 'Update Pooja' : 'Create Pooja'}
-          </button>
-        </div>
+        <AdminFormCard>
+          <AdminInput placeholder="Name (Malayalam)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <AdminInput placeholder="Name (English)" value={form.nameEn} onChange={(e) => setForm({ ...form, nameEn: e.target.value })} />
+          <AdminInput placeholder="Price (₹)" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
+          <AdminInput placeholder="Duration (minutes)" type="number" value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })} />
+          <AdminTextarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <div className="md:col-span-2">
+            <button onClick={save}
+              className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all duration-300 hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)' }}>
+              {editingId ? '✓ Update Pooja' : '+ Create Pooja'}
+            </button>
+          </div>
+        </AdminFormCard>
       )}
 
-      {isLoading && <p className="text-ink/50">Loading...</p>}
-      <div className="bg-white rounded-sm border border-brass/20 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-cream-dark text-left">
-            <tr>
-              <th className="p-3">Name</th><th className="p-3">Price</th><th className="p-3">Available</th><th className="p-3">Active</th><th className="p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {poojas?.map((p) => (
-              <tr key={p.id} className="border-t border-brass/10">
-                <td className="p-3">{p.nameEn} <span className="text-ink/40">({p.name})</span></td>
-                <td className="p-3">₹{Number(p.price).toFixed(2)}</td>
-                <td className="p-3">
-                  <button onClick={() => toggleAvailable(p)} className={`px-2 py-1 rounded-sm text-xs ${p.isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {p.isAvailable ? 'Available' : 'Unavailable'}
-                  </button>
-                </td>
-                <td className="p-3">{p.isActive ? 'Active' : 'Inactive'}</td>
-                <td className="p-3 space-x-2">
-                  <button onClick={() => startEdit(p)} className="text-sanctum hover:underline">Edit</button>
-                  <button onClick={() => deactivate(p)} className="text-red-700 hover:underline">Deactivate</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      {isLoading && <p className="text-purple-200/40 text-sm animate-pulse">Loading poojas...</p>}
+
+      <AdminTable
+        headers={['Pooja Name', 'Price', 'Duration', 'Availability', 'Status', 'Actions']}
+        isEmpty={!isLoading && (!poojas || poojas.length === 0)}
+        emptyMessage="No poojas found. Click '+ Add Pooja' to create one."
+      >
+        {poojas?.map((p, i) => (
+          <AdminTr key={p.id} index={i}>
+            <AdminTd>
+              <div>
+                <div className="font-semibold text-white">{p.nameEn}</div>
+                <div className="text-xs text-purple-200/50 mt-0.5 font-mal">{p.name}</div>
+              </div>
+            </AdminTd>
+            <AdminTd><span className="font-bold text-amber-300">₹{Number(p.price).toFixed(2)}</span></AdminTd>
+            <AdminTd><span className="text-purple-200/60">{p.durationMinutes} min</span></AdminTd>
+            <AdminTd>
+              <button onClick={() => toggleAvailable(p)}>
+                <StatusBadge status={p.isAvailable ? 'ACTIVE' : 'INACTIVE'} />
+              </button>
+            </AdminTd>
+            <AdminTd><StatusBadge status={p.isActive ? 'ACTIVE' : 'INACTIVE'} /></AdminTd>
+            <AdminTd>
+              <div className="flex gap-2">
+                <AdminBtn onClick={() => startEdit(p)} variant="default">✏️ Edit</AdminBtn>
+                <AdminBtn onClick={() => deactivate(p)} variant="danger">🗑 Deactivate</AdminBtn>
+              </div>
+            </AdminTd>
+          </AdminTr>
+        ))}
+      </AdminTable>
+    </AdminPageShell>
   );
 }

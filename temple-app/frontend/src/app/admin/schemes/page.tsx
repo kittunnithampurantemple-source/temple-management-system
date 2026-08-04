@@ -1,6 +1,7 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { AdminPageShell, AdminTable, AdminTr, AdminTd, StatusBadge } from '@/components/admin/AdminUI';
 
 export default function AdminSchemesPage() {
   const { data, isLoading } = useQuery<any[]>({
@@ -9,27 +10,24 @@ export default function AdminSchemesPage() {
   });
 
   return (
-    <div>
-      <h1 className="font-display text-3xl text-sanctum mb-6">Annual Scheme Management</h1>
-      {isLoading && <p className="text-ink/50">Loading...</p>}
-      <div className="bg-white rounded-sm border border-brass/20 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-cream-dark text-left">
-            <tr><th className="p-3">Scheme #</th><th className="p-3">Name</th><th className="p-3">Devotee</th><th className="p-3">Renewal Date</th><th className="p-3">Status</th></tr>
-          </thead>
-          <tbody>
-            {data?.map((s) => (
-              <tr key={s.id} className="border-t border-brass/10">
-                <td className="p-3">{s.schemeNumber}</td>
-                <td className="p-3">{s.schemeName}</td>
-                <td className="p-3">{s.devoteeName}</td>
-                <td className="p-3">{new Date(s.renewalDate).toLocaleDateString('en-IN')}</td>
-                <td className="p-3">{s.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <AdminPageShell title="Annual Schemes" icon="📋" subtitle="Manage annual scheme enrollments">
+      {isLoading && <p className="text-purple-200/40 text-sm animate-pulse">Loading schemes...</p>}
+      <AdminTable
+        headers={['Scheme #', 'Scheme Name', 'Devotee', 'Amount', 'Renewal Date', 'Status']}
+        isEmpty={!isLoading && (!data || data.length === 0)}
+        emptyMessage="No annual schemes found."
+      >
+        {data?.map((s, i) => (
+          <AdminTr key={s.id} index={i}>
+            <AdminTd><span className="font-mono text-xs text-purple-300">{s.schemeNumber}</span></AdminTd>
+            <AdminTd><span className="font-semibold text-white">{s.schemeName}</span></AdminTd>
+            <AdminTd><span className="text-white/80">{s.devoteeName}</span></AdminTd>
+            <AdminTd><span className="font-bold text-amber-300">₹{Number(s.amount ?? 0).toFixed(2)}</span></AdminTd>
+            <AdminTd><span className="text-purple-200/60 text-xs">{new Date(s.renewalDate).toLocaleDateString('en-IN')}</span></AdminTd>
+            <AdminTd><StatusBadge status={s.status ?? 'ACTIVE'} /></AdminTd>
+          </AdminTr>
+        ))}
+      </AdminTable>
+    </AdminPageShell>
   );
 }

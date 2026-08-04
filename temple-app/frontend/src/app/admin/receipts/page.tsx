@@ -1,11 +1,10 @@
 'use client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, apiBaseUrl } from '@/lib/api';
+import { AdminPageShell, AdminTable, AdminTr, AdminTd, AdminBtn } from '@/components/admin/AdminUI';
 
 export default function AdminReceiptsPage() {
   const queryClient = useQueryClient();
-  // Receipts are surfaced through bookings/donations/schemes; here we pull
-  // bookings with receipts as a representative combined view.
   const { data: bookings } = useQuery<any[]>({
     queryKey: ['admin-bookings-receipts'],
     queryFn: () => api.get('/bookings'),
@@ -19,32 +18,35 @@ export default function AdminReceiptsPage() {
   const withReceipts = bookings?.filter((b) => b.receipt);
 
   return (
-    <div>
-      <h1 className="font-display text-3xl text-sanctum mb-6">Receipt Management</h1>
-      <p className="text-sm text-ink/50 mb-4">
-        Showing pooja booking receipts. Donation and scheme receipts can be downloaded
-        the same way from their respective records (id shown on each record).
-      </p>
-      <div className="bg-white rounded-sm border border-brass/20 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-cream-dark text-left">
-            <tr><th className="p-3">Receipt #</th><th className="p-3">Booking #</th><th className="p-3">Reprints</th><th className="p-3">Actions</th></tr>
-          </thead>
-          <tbody>
-            {withReceipts?.map((b) => (
-              <tr key={b.id} className="border-t border-brass/10">
-                <td className="p-3">{b.receipt.receiptNumber}</td>
-                <td className="p-3">{b.bookingNumber}</td>
-                <td className="p-3">{b.receipt.reprintCount}</td>
-                <td className="p-3 space-x-3">
-                  <a href={`${apiBaseUrl}/receipts/${b.receipt.id}/download`} target="_blank" className="text-sanctum hover:underline">Download</a>
-                  <button onClick={() => reprint(b.receipt.id)} className="text-brass-dark hover:underline">Reprint</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <AdminPageShell title="Receipt Management" icon="🧾" subtitle="Download and reprint booking receipts">
+      <div className="px-1 py-2 rounded-xl border border-purple-400/20 bg-purple-500/10 text-purple-200/70 text-xs mb-2">
+        ℹ️ Showing pooja booking receipts. Donation and scheme receipts can be accessed from their respective records.
       </div>
-    </div>
+      <AdminTable
+        headers={['Receipt #', 'Booking #', 'Pooja', 'Devotee', 'Reprints', 'Actions']}
+        isEmpty={!withReceipts || withReceipts.length === 0}
+        emptyMessage="No receipts found."
+      >
+        {withReceipts?.map((b, i) => (
+          <AdminTr key={b.id} index={i}>
+            <AdminTd><span className="font-mono text-xs text-amber-300">{b.receipt.receiptNumber}</span></AdminTd>
+            <AdminTd><span className="font-mono text-xs text-purple-300">{b.bookingNumber}</span></AdminTd>
+            <AdminTd><span className="font-semibold text-white">{b.pooja?.nameEn}</span></AdminTd>
+            <AdminTd><span className="text-white/80">{b.devoteeName}</span></AdminTd>
+            <AdminTd>
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/10 text-xs font-bold text-white">
+                {b.receipt.reprintCount}
+              </span>
+            </AdminTd>
+            <AdminTd>
+              <div className="flex gap-2">
+                <AdminBtn href={`${apiBaseUrl}/receipts/${b.receipt.id}/download`} variant="success">⬇ Download</AdminBtn>
+                <AdminBtn onClick={() => reprint(b.receipt.id)} variant="ghost">🖨 Reprint</AdminBtn>
+              </div>
+            </AdminTd>
+          </AdminTr>
+        ))}
+      </AdminTable>
+    </AdminPageShell>
   );
 }

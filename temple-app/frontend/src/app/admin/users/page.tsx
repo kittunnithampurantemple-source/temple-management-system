@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { AdminPageShell, AdminFormCard, AdminTable, AdminTr, AdminTd, AdminBtn, AdminPrimaryBtn, AdminInput, AdminSelect, StatusBadge } from '@/components/admin/AdminUI';
 
 export default function AdminUsersPage() {
   const queryClient = useQueryClient();
@@ -26,47 +27,67 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="font-display text-3xl text-sanctum">User Management</h1>
-        <button onClick={() => setShowForm(!showForm)} className="bg-sanctum text-cream px-4 py-2 rounded-sm text-sm hover:bg-sanctum-dark">
-          {showForm ? 'Cancel' : '+ Add Staff/Admin'}
-        </button>
-      </div>
-
+    <AdminPageShell
+      title="User Management" icon="👥" subtitle="Manage admin and staff accounts"
+      action={
+        <AdminPrimaryBtn onClick={() => setShowForm(!showForm)}>
+          {showForm ? '✕ Cancel' : '+ Add Staff/Admin'}
+        </AdminPrimaryBtn>
+      }
+    >
       {showForm && (
-        <div className="bg-white border border-brass/20 rounded-sm p-5 mb-6 grid md:grid-cols-2 gap-3">
-          <input placeholder="Full Name" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <input placeholder="Temporary Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2" />
-          <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="border border-brass/40 rounded-sm px-3 py-2">
+        <AdminFormCard>
+          <AdminInput placeholder="Full Name" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
+          <AdminInput placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <AdminInput placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <AdminInput placeholder="Temporary Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <AdminSelect value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
             <option value="STAFF">Staff</option>
             <option value="ADMIN">Admin</option>
-          </select>
-          <button onClick={create} className="bg-brass text-ink px-4 py-2 rounded-sm hover:bg-brass-light">Create User</button>
-        </div>
+          </AdminSelect>
+          <div className="flex items-end">
+            <button onClick={create}
+              className="w-full py-2.5 rounded-xl font-bold text-white text-sm transition-all duration-300 hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)' }}>
+              ✓ Create User
+            </button>
+          </div>
+        </AdminFormCard>
       )}
 
-      {isLoading && <p className="text-ink/50">Loading...</p>}
-      <div className="bg-white rounded-sm border border-brass/20 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-cream-dark text-left">
-            <tr><th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Role</th><th className="p-3">Status</th><th className="p-3">Actions</th></tr>
-          </thead>
-          <tbody>
-            {users?.map((u) => (
-              <tr key={u.id} className="border-t border-brass/10">
-                <td className="p-3">{u.fullName}</td>
-                <td className="p-3">{u.email}</td>
-                <td className="p-3">{u.role}</td>
-                <td className="p-3">{u.isActive ? 'Active' : 'Disabled'}</td>
-                <td className="p-3"><button onClick={() => toggleActive(u)} className="text-sanctum hover:underline">{u.isActive ? 'Disable' : 'Enable'}</button></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      {isLoading && <p className="text-purple-200/40 text-sm animate-pulse">Loading users...</p>}
+
+      <AdminTable
+        headers={['Name', 'Email', 'Phone', 'Role', 'Status', 'Actions']}
+        isEmpty={!isLoading && (!users || users.length === 0)}
+        emptyMessage="No users found."
+      >
+        {users?.map((u, i) => (
+          <AdminTr key={u.id} index={i}>
+            <AdminTd>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)' }}>
+                  {u.fullName?.charAt(0)?.toUpperCase()}
+                </div>
+                <span className="font-semibold text-white">{u.fullName}</span>
+              </div>
+            </AdminTd>
+            <AdminTd><span className="text-purple-200/70 text-xs">{u.email}</span></AdminTd>
+            <AdminTd><span className="text-purple-200/60 text-xs">{u.phone || '—'}</span></AdminTd>
+            <AdminTd><StatusBadge status={u.role} /></AdminTd>
+            <AdminTd><StatusBadge status={u.isActive ? 'ACTIVE' : 'INACTIVE'} /></AdminTd>
+            <AdminTd>
+              <AdminBtn
+                onClick={() => toggleActive(u)}
+                variant={u.isActive ? 'danger' : 'success'}
+              >
+                {u.isActive ? '🚫 Disable' : '✓ Enable'}
+              </AdminBtn>
+            </AdminTd>
+          </AdminTr>
+        ))}
+      </AdminTable>
+    </AdminPageShell>
   );
 }

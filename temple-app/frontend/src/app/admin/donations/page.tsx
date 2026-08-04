@@ -1,6 +1,7 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { AdminPageShell, AdminTable, AdminTr, AdminTd, StatusBadge } from '@/components/admin/AdminUI';
 
 export default function AdminDonationsPage() {
   const { data, isLoading } = useQuery<any[]>({
@@ -9,27 +10,24 @@ export default function AdminDonationsPage() {
   });
 
   return (
-    <div>
-      <h1 className="font-display text-3xl text-sanctum mb-6">Donation Management</h1>
-      {isLoading && <p className="text-ink/50">Loading...</p>}
-      <div className="bg-white rounded-sm border border-brass/20 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-cream-dark text-left">
-            <tr><th className="p-3">Donation #</th><th className="p-3">Type</th><th className="p-3">Donor</th><th className="p-3">Amount</th><th className="p-3">Date</th></tr>
-          </thead>
-          <tbody>
-            {data?.map((d) => (
-              <tr key={d.id} className="border-t border-brass/10">
-                <td className="p-3">{d.donationNumber}</td>
-                <td className="p-3">{d.donationType}</td>
-                <td className="p-3">{d.donorName}</td>
-                <td className="p-3">₹{Number(d.amount).toFixed(2)}</td>
-                <td className="p-3">{new Date(d.createdAt).toLocaleDateString('en-IN')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <AdminPageShell title="Donation Management" icon="💛" subtitle="Track all temple donations">
+      {isLoading && <p className="text-purple-200/40 text-sm animate-pulse">Loading donations...</p>}
+      <AdminTable
+        headers={['Donation #', 'Type', 'Donor Name', 'Amount', 'Payment', 'Date']}
+        isEmpty={!isLoading && (!data || data.length === 0)}
+        emptyMessage="No donations recorded yet."
+      >
+        {data?.map((d, i) => (
+          <AdminTr key={d.id} index={i}>
+            <AdminTd><span className="font-mono text-xs text-purple-300">{d.donationNumber}</span></AdminTd>
+            <AdminTd><StatusBadge status={d.donationType} /></AdminTd>
+            <AdminTd><span className="font-semibold text-white">{d.donorName}</span></AdminTd>
+            <AdminTd><span className="font-bold text-amber-300">₹{Number(d.amount).toFixed(2)}</span></AdminTd>
+            <AdminTd><span className="text-purple-200/60 text-xs uppercase tracking-wide">{d.paymentMethod?.replace(/_/g, ' ')}</span></AdminTd>
+            <AdminTd><span className="text-purple-200/60 text-xs">{new Date(d.createdAt).toLocaleDateString('en-IN')}</span></AdminTd>
+          </AdminTr>
+        ))}
+      </AdminTable>
+    </AdminPageShell>
   );
 }
