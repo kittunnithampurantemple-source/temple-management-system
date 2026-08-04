@@ -37,11 +37,11 @@ export default function AdminUsersPage() {
     >
       {showForm && (
         <AdminFormCard>
-          <AdminInput placeholder="Full Name" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
-          <AdminInput placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          <AdminInput placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <AdminInput placeholder="Temporary Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-          <AdminSelect value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
+          <AdminInput label="Full Name" placeholder="e.g. John Doe" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
+          <AdminInput label="Email" placeholder="admin@temple.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <AdminInput label="Phone Number" placeholder="Optional" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <AdminInput label="Temporary Password" placeholder="Must be changed on first login" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <AdminSelect label="Role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
             <option value="STAFF">Staff</option>
             <option value="ADMIN">Admin</option>
           </AdminSelect>

@@ -162,31 +162,52 @@ export function AdminPrimaryBtn({ children, onClick }: { children: React.ReactNo
 }
 
 // Input for forms
-export function AdminInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
+export function AdminInput({ label, className = '', ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label?: string }) {
+  const input = (
     <input
       {...props}
-      className="w-full px-4 py-2.5 rounded-xl text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-violet-400/60 focus:bg-white/10 placeholder-white/30 transition-all duration-200"
+      className={`w-full px-4 py-2.5 rounded-xl text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-violet-400/60 focus:bg-white/10 placeholder-white/30 transition-all duration-200 ${className}`}
     />
+  );
+  if (!label) return input;
+  return (
+    <div className={`w-full ${className}`}>
+      <label className="block text-xs font-semibold text-purple-200/70 uppercase tracking-wider mb-1.5">{label}</label>
+      {input}
+    </div>
   );
 }
 
-export function AdminSelect({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & { children: React.ReactNode }) {
-  return (
+export function AdminSelect({ label, children, className = '', ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & { label?: string; children: React.ReactNode }) {
+  const select = (
     <select
       {...props}
-      className="w-full px-4 py-2.5 rounded-xl text-sm text-white bg-white/10 border border-white/10 focus:outline-none focus:border-violet-400/60 transition-all duration-200"
+      className={`w-full px-4 py-2.5 rounded-xl text-sm text-white bg-white/10 border border-white/10 focus:outline-none focus:border-violet-400/60 transition-all duration-200 ${className}`}
     >
       {children}
     </select>
   );
+  if (!label) return select;
+  return (
+    <div className={`w-full ${className}`}>
+      <label className="block text-xs font-semibold text-purple-200/70 uppercase tracking-wider mb-1.5">{label}</label>
+      {select}
+    </div>
+  );
 }
 
-export function AdminTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
+export function AdminTextarea({ label, className = '', ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { label?: string }) {
+  const textarea = (
     <textarea
       {...props}
-      className="w-full px-4 py-2.5 rounded-xl text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-violet-400/60 focus:bg-white/10 placeholder-white/30 transition-all duration-200 md:col-span-2"
+      className="w-full px-4 py-2.5 rounded-xl text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-violet-400/60 focus:bg-white/10 placeholder-white/30 transition-all duration-200"
     />
+  );
+  if (!label) return <div className={`md:col-span-2 ${className}`}>{textarea}</div>;
+  return (
+    <div className={`w-full md:col-span-2 ${className}`}>
+      <label className="block text-xs font-semibold text-purple-200/70 uppercase tracking-wider mb-1.5">{label}</label>
+      {textarea}
+    </div>
   );
 }

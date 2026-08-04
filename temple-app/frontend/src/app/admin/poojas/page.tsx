@@ -51,11 +51,11 @@ export default function AdminPoojasPage() {
     >
       {showForm && (
         <AdminFormCard>
-          <AdminInput placeholder="Name (Malayalam)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <AdminInput placeholder="Name (English)" value={form.nameEn} onChange={(e) => setForm({ ...form, nameEn: e.target.value })} />
-          <AdminInput placeholder="Price (₹)" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
-          <AdminInput placeholder="Duration (minutes)" type="number" value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })} />
-          <AdminTextarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <AdminInput label="Name (Malayalam)" placeholder="e.g. ഗണപതി ഹോമം" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <AdminInput label="Name (English)" placeholder="e.g. Ganapathy Homam" value={form.nameEn} onChange={(e) => setForm({ ...form, nameEn: e.target.value })} />
+          <AdminInput label="Price (₹)" placeholder="0.00" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
+          <AdminInput label="Duration (minutes)" placeholder="30" type="number" value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })} />
+          <AdminTextarea label="Description" placeholder="Enter details about this pooja..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           <div className="md:col-span-2">
             <button onClick={save}
               className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all duration-300 hover:-translate-y-0.5"

@@ -48,20 +48,20 @@ export default function AdminBookingsPage() {
     >
       {showOfflineForm && (
         <AdminFormCard>
-          <AdminSelect value={offlineForm.poojaId} onChange={(e) => setOfflineForm({ ...offlineForm, poojaId: e.target.value })}>
+          <AdminSelect label="Pooja" value={offlineForm.poojaId} onChange={(e) => setOfflineForm({ ...offlineForm, poojaId: e.target.value })}>
             <option value="">Select Pooja</option>
             {poojas?.map((p) => <option key={p.id} value={p.id}>{p.nameEn} — ₹{Number(p.price).toFixed(2)}</option>)}
           </AdminSelect>
-          <AdminInput type="date" value={offlineForm.poojaDate} onChange={(e) => setOfflineForm({ ...offlineForm, poojaDate: e.target.value })} />
-          <AdminInput placeholder="Devotee Name" value={offlineForm.devoteeName} onChange={(e) => setOfflineForm({ ...offlineForm, devoteeName: e.target.value })} />
-          <AdminInput placeholder="Nakshatra" value={offlineForm.nakshatra} onChange={(e) => setOfflineForm({ ...offlineForm, nakshatra: e.target.value })} />
-          <AdminInput placeholder="Email" value={offlineForm.email} onChange={(e) => setOfflineForm({ ...offlineForm, email: e.target.value })} />
-          <AdminInput placeholder="Phone" value={offlineForm.phone} onChange={(e) => setOfflineForm({ ...offlineForm, phone: e.target.value })} />
-          <AdminInput placeholder="Address" value={offlineForm.address} onChange={(e) => setOfflineForm({ ...offlineForm, address: e.target.value })} className="md:col-span-2" />
-          <AdminSelect value={offlineForm.paymentMethod} onChange={(e) => setOfflineForm({ ...offlineForm, paymentMethod: e.target.value })}>
+          <AdminInput label="Date" type="date" value={offlineForm.poojaDate} onChange={(e) => setOfflineForm({ ...offlineForm, poojaDate: e.target.value })} />
+          <AdminInput label="Devotee Name" placeholder="Full Name" value={offlineForm.devoteeName} onChange={(e) => setOfflineForm({ ...offlineForm, devoteeName: e.target.value })} />
+          <AdminInput label="Nakshatra" placeholder="Star Sign (Optional)" value={offlineForm.nakshatra} onChange={(e) => setOfflineForm({ ...offlineForm, nakshatra: e.target.value })} />
+          <AdminInput label="Email" placeholder="Email Address (Optional)" value={offlineForm.email} onChange={(e) => setOfflineForm({ ...offlineForm, email: e.target.value })} />
+          <AdminInput label="Phone" placeholder="Phone Number" value={offlineForm.phone} onChange={(e) => setOfflineForm({ ...offlineForm, phone: e.target.value })} />
+          <AdminInput label="Address" placeholder="Full Address (Optional)" value={offlineForm.address} onChange={(e) => setOfflineForm({ ...offlineForm, address: e.target.value })} className="md:col-span-2" />
+          <AdminSelect label="Payment Method" value={offlineForm.paymentMethod} onChange={(e) => setOfflineForm({ ...offlineForm, paymentMethod: e.target.value })}>
             {paymentMethods.map((m) => <option key={m} value={m}>{m}</option>)}
           </AdminSelect>
-          <AdminInput placeholder="Reference (cheque no. / txn ref)" value={offlineForm.offlineReference} onChange={(e) => setOfflineForm({ ...offlineForm, offlineReference: e.target.value })} />
+          <AdminInput label="Payment Reference" placeholder="Cheque no. / TXN Ref (if applicable)" value={offlineForm.offlineReference} onChange={(e) => setOfflineForm({ ...offlineForm, offlineReference: e.target.value })} />
           <div className="md:col-span-2">
             <button onClick={submitOffline}
               className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all duration-300 hover:-translate-y-0.5"
