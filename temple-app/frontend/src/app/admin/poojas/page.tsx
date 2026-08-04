@@ -36,8 +36,8 @@ export default function AdminPoojasPage() {
     await api.patch(`/poojas/${p.id}`, { isAvailable: !p.isAvailable }); refresh();
   };
 
-  const deactivate = async (p: Pooja) => {
-    await api.delete(`/poojas/${p.id}`); refresh();
+  const toggleActive = async (p: Pooja) => {
+    await api.patch(`/poojas/${p.id}`, { isActive: !p.isActive }); refresh();
   };
 
   return (
@@ -92,7 +92,9 @@ export default function AdminPoojasPage() {
             <AdminTd>
               <div className="flex gap-2">
                 <AdminBtn onClick={() => startEdit(p)} variant="default">✏️ Edit</AdminBtn>
-                <AdminBtn onClick={() => deactivate(p)} variant="danger">🗑 Deactivate</AdminBtn>
+                <AdminBtn onClick={() => toggleActive(p)} variant={p.isActive ? 'danger' : 'success'}>
+                  {p.isActive ? '🗑 Deactivate' : '✓ Reactivate'}
+                </AdminBtn>
               </div>
             </AdminTd>
           </AdminTr>
