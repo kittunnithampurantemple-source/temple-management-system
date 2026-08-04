@@ -18,11 +18,25 @@ const navItems = [
 export default function Header() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Check auth state on mount and when menu opens
   useEffect(() => {
     const checkAuth = () => {
-      setIsLoggedIn(localStorage.getItem('isAuthenticated') === 'true');
+      const isAuth = localStorage.getItem('isAuthenticated') === 'true';
+      setIsLoggedIn(isAuth);
+      
+      const token = localStorage.getItem('accessToken');
+      let adminFlag = false;
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.role === 'ADMIN' || payload.role === 'STAFF') {
+            adminFlag = true;
+          }
+        } catch (e) {}
+      }
+      setIsAdmin(adminFlag);
     };
     checkAuth();
     // Listen for storage events in case login happens in another tab
@@ -59,6 +73,14 @@ export default function Header() {
           >
             Book a Pooja
           </Link>
+          {isAdmin && (
+            <Link
+              href="/admin/dashboard"
+              className="inline-flex items-center justify-center bg-zinc-900 border border-zinc-700 text-cream px-5 py-2 rounded-full text-sm font-semibold hover:bg-zinc-800 hover:-translate-y-0.5 transition-all duration-300 focus-ring"
+            >
+              Admin Panel
+            </Link>
+          )}
           
           {/* User Profile Menu */}
           <div className="relative">
