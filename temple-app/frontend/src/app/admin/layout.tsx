@@ -13,7 +13,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <AdminGuard>
       <div className="flex">
         <AdminSidebar />
-        <main className="flex-1 p-8 bg-cream-dark min-h-screen">{children}</main>
+        <main className="flex-1 p-8 min-h-screen" style={{ background: 'linear-gradient(135deg, #f8f7ff 0%, #f0f4ff 50%, #f8f0ff 100%)' }}>{children}</main>
       </div>
     </AdminGuard>
   );
